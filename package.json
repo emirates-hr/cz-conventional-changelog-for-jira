@@ -1,6 +1,6 @@
 {
   "name": "@emirates-hr/cz-conventional-changelog-for-jira",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Commitizen adapter following the conventional-changelog format and also asking for JIRA issue.",
   "main": "index.js",
   "scripts": {
