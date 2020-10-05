@@ -47,7 +47,10 @@ const options = {
     (process.env.CZ_MAX_LINE_WIDTH &&
       parseInt(process.env.CZ_MAX_LINE_WIDTH)) ||
     config.maxLineWidth ||
-    defaults.maxLineWidth
+    defaults.maxLineWidth,
+  scopeOverrides:
+    config.scopeOverrides || {},
+  allowCustomScopes: config.allowCustomScopes || false
 };
 
 (function(options) {

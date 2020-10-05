@@ -6,6 +6,7 @@ var longest = require('longest');
 var rightPad = require('right-pad');
 var chalk = require('chalk');
 const branch = require('git-branch');
+const gitlog = require('gitlog');
 
 var defaults = require('./defaults');
 const LimitedInputPrompt = require('./LimitedInputPrompt');
@@ -43,15 +44,36 @@ module.exports = function(options) {
   const minHeaderWidth = getFromOptionsOrDefaults('minHeaderWidth');
   const maxHeaderWidth = getFromOptionsOrDefaults('maxHeaderWidth');
 
+  const commits = gitlog.default({
+    repo: '.',
+    number: 1
+  });
+
+  // Get Jira issue key from the branch name
   const branchName = branch.sync() || '';
   const jiraIssueRegex = /(?<jiraIssue>\/[A-Z]+-\d+)/;
   const matchResult = branchName.match(jiraIssueRegex);
-  const jiraIssue =
-    matchResult && matchResult.groups && matchResult.groups.jiraIssue;
+
+  // Get Jira issue key from the previous commit subject
+  const lastSubject = commits.length > 0 ? commits[0].subject  : '';
+  const jiraSubjectIssueRegex = /(?<jiraIssue>[A-Z]+-\d+)/;
+  const commitMatchResult = lastSubject.match(jiraSubjectIssueRegex);
+
+  let jiraIssue = '';
+
+  if (matchResult && matchResult.groups && matchResult.groups.jiraIssue) {
+    jiraIssue = matchResult.groups.jiraIssue.substring(1);
+  }
+
+  if (commitMatchResult && commitMatchResult.groups && commitMatchResult.groups.jiraIssue) {
+    jiraIssue = commitMatchResult.groups.jiraIssue;
+  }
+
   const hasScopes =
     options.scopes &&
     Array.isArray(options.scopes) &&
     options.scopes.length > 0;
+  const scopeOverrides = options.scopeOverrides || {};
 
   return {
     // When a user runs `git cz`, prompter will
@@ -84,6 +106,45 @@ module.exports = function(options) {
           default: options.defaultType
         },
         {
+          type: hasScopes ? 'list' : 'input',
+          name: 'scope',
+          when: !options.skipScope,
+          choices: function(answers) {
+            let scopes = [];
+
+            if (hasScopes) {
+              scopes = options.scopes;
+            }
+
+            if (scopeOverrides[answers.type]) {
+              scopes = scopeOverrides[answers.type];
+            }
+
+            if (options.allowCustomScopes || scopes.length === 0) {
+              scopes = scopes.concat([
+                new cz.Separator(),
+                { name: 'empty', value: false },
+                { name: 'custom', value: 'custom' },
+              ]);
+            }
+
+            return scopes;
+          },
+          message: 'What is the scope of this change (e.g. component or file name):',
+          default: options.defaultScope,
+          filter: function(value) {
+            return value.trim().toLowerCase();
+          }
+        },
+        {
+          type: 'input',
+          name: 'scope',
+          message: 'What is the scope of this change:',
+          when(answers) {
+            return answers.scope === 'custom';
+          },
+        },
+        {
           type: 'input',
           name: 'jira',
           message:
@@ -91,27 +152,12 @@ module.exports = function(options) {
             getFromOptionsOrDefaults('jiraPrefix') +
             '-12345):',
           when: options.jiraMode,
-          default: jiraIssue ? jiraIssue.substring(1) : '',
+          default: jiraIssue,
           validate: function(jira) {
             return /^[A-Z]+-[0-9]+$/.test(jira);
           },
           filter: function(jira) {
             return jira.toUpperCase();
-          }
-        },
-        {
-          type: hasScopes ? 'list' : 'input',
-          name: 'scope',
-          when: !options.skipScope,
-          choices: hasScopes ? options.scopes : undefined,
-          message:
-            'What is the scope of this change (e.g. component or file name): ' +
-            hasScopes
-              ? '(select from the list)'
-              : '(press enter to skip)',
-          default: options.defaultScope,
-          filter: function(value) {
-            return value.trim().toLowerCase();
           }
         },
         {
@@ -121,7 +167,7 @@ module.exports = function(options) {
           default: options.defaultSubject,
           maxLength: maxHeaderWidth,
           leadingLabel: answers => {
-            const jira = answers.jira ? ` ${answers.jira}` : '';
+            const jira = answers.jira ? ` [${answers.jira}]` : '';
             let scope = '';
 
             if (answers.scope && answers.scope !== 'none') {
@@ -186,6 +232,19 @@ module.exports = function(options) {
             return answers.isIssueAffected;
           },
           default: options.defaultIssues ? options.defaultIssues : undefined
+        },
+        {
+          type: 'input',
+          name: 'jiraComment',
+          message: 'Add a comment for Jira: (press enter to skip)\n',
+          default: undefined
+        },
+        {
+          type: 'input',
+          name: 'trackTime',
+          message: 'Enter the time if you want to track it in Jira (format: 1w 2d 4h 30m):  (press enter to skip)\n',
+          validate: input => /^(\dw)?\s?(\dd)?\s?(\d{1,2}h)?\s?(\d{1,2}m)?$/.test(input),
+          default: undefined
         }
       ]).then(function(answers) {
         var wrapOptions = {
@@ -197,25 +256,28 @@ module.exports = function(options) {
         };
 
         // parentheses are only needed when a scope is present
-        var scope = answers.scope ? '(' + answers.scope + ')' : '';
-        var jira = answers.jira ? answers.jira + ' ' : '';
+        const scope = answers.scope ? `(${answers.scope})` : '';
+        const jira = answers.jira ? `${answers.jira} ` : '';
 
         // Hard limit this line in the validate
         const head = answers.type + scope + ': ' + jira + answers.subject;
 
         // Wrap these lines at options.maxLineWidth characters
-        var body = answers.body ? wrap(answers.body, wrapOptions) : false;
+        const body = answers.body ? wrap(answers.body, wrapOptions) : false;
 
         // Apply breaking change prefix, removing it if already present
-        var breaking = answers.breaking ? answers.breaking.trim() : '';
+        let breaking = answers.breaking ? answers.breaking.trim() : '';
         breaking = breaking
           ? 'BREAKING CHANGE: ' + breaking.replace(/^BREAKING CHANGE: /, '')
           : '';
         breaking = breaking ? wrap(breaking, wrapOptions) : false;
 
-        var issues = answers.issues ? wrap(answers.issues, wrapOptions) : false;
+        const issues = answers.issues ? wrap(answers.issues, wrapOptions) : false;
 
-        commit(filter([head, body, breaking, issues]).join('\n\n'));
+        const jiraComment = answers.jiraComment ? `#comment ${answers.jiraComment}` : false;
+        const time = answers.trackTime ? `#time ${answers.trackTime}` : false;
+
+        commit(filter([head, body, breaking, issues, jiraComment, time]).join('\n\n'));
       });
     }
   };

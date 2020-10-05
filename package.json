@@ -1,18 +1,24 @@
 {
-  "name": "@digitalroute/cz-conventional-changelog-for-jira",
-  "version": "0.0.0-semantically-released",
+  "name": "@emirates-hr/cz-conventional-changelog-for-jira",
+  "version": "0.0.2",
   "description": "Commitizen adapter following the conventional-changelog format and also asking for JIRA issue.",
   "main": "index.js",
   "scripts": {
     "commit": "git-cz",
     "test": "mocha *.test.js",
     "format": "prettier --write *.js",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "prepublishOnly": "npm test",
+    "preversion": "npm run lint"
   },
   "homepage": "https://github.com/digitalroute/cz-conventional-changelog-for-jira",
   "repository": {
     "type": "git",
-    "url": "https://github.com/digitalroute/cz-conventional-changelog-for-jira.git"
+    "url": "git+https://github.com/emirates-hr/cz-conventional-changelog-for-jira.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "access": "public"
   },
   "engineStrict": true,
   "engines": {
@@ -24,6 +30,7 @@
     "chalk": "^2.4.1",
     "commitizen": "^4.0.3",
     "git-branch": "^2.0.1",
+    "gitlog": "4.0.2",
     "lodash.map": "^4.5.1",
     "longest": "^2.0.1",
     "right-pad": "^1.0.1",
@@ -50,8 +57,5 @@
       "jiraMode": false,
       "skipScope": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
