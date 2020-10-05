@@ -66,7 +66,7 @@ module.exports = function(options) {
   }
 
   if (commitMatchResult && commitMatchResult.groups && commitMatchResult.groups.jiraIssue) {
-    jiraIssue = commitMatchResult.groups.jiraIssue;
+    jiraIssue = commitMatchResult.groups.jiraIssue.substring(1, commitMatchResult.groups.jiraIssue.length - 1);
   }
 
   const hasScopes =
