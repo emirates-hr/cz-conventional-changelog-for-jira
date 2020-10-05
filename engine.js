@@ -56,7 +56,7 @@ module.exports = function(options) {
 
   // Get Jira issue key from the previous commit subject
   const lastSubject = commits.length > 0 ? commits[0].subject  : '';
-  const jiraSubjectIssueRegex = /(?<jiraIssue>[A-Z]+-\d+)/;
+  const jiraSubjectIssueRegex = /(?<jiraIssue>\[[A-Z]+-\d+\])/;
   const commitMatchResult = lastSubject.match(jiraSubjectIssueRegex);
 
   let jiraIssue = '';
@@ -257,7 +257,7 @@ module.exports = function(options) {
 
         // parentheses are only needed when a scope is present
         const scope = answers.scope ? `(${answers.scope})` : '';
-        const jira = answers.jira ? `${answers.jira} ` : '';
+        const jira = answers.jira ? `[${answers.jira}] ` : '';
 
         // Hard limit this line in the validate
         const head = answers.type + scope + ': ' + jira + answers.subject;

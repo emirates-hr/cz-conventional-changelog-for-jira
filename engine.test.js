@@ -54,7 +54,7 @@ describe('commit message', function() {
         jira,
         subject
       })
-    ).to.equal(`${type}: ${jira} ${subject}`);
+    ).to.equal(`${type}: [${jira}] ${subject}`);
   });
   it('only header w/ scope', function() {
     expect(
@@ -64,7 +64,7 @@ describe('commit message', function() {
         jira,
         subject
       })
-    ).to.equal(`${type}(${scope}): ${jira} ${subject}`);
+    ).to.equal(`${type}(${scope}): [${jira}] ${subject}`);
   });
   it('header and body w/ out scope', function() {
     expect(
@@ -74,7 +74,7 @@ describe('commit message', function() {
         subject,
         body
       })
-    ).to.equal(`${type}: ${jira} ${subject}\n\n${body}`);
+    ).to.equal(`${type}: [${jira}] ${subject}\n\n${body}`);
   });
   it('header and body w/ scope', function() {
     expect(
@@ -85,7 +85,7 @@ describe('commit message', function() {
         subject,
         body
       })
-    ).to.equal(`${type}(${scope}): ${jira} ${subject}\n\n${body}`);
+    ).to.equal(`${type}(${scope}): [${jira}] ${subject}\n\n${body}`);
   });
   it('header, body and issues w/ out scope', function() {
     expect(
@@ -96,7 +96,7 @@ describe('commit message', function() {
         body,
         issues
       })
-    ).to.equal(`${type}: ${jira} ${subject}\n\n${body}\n\n${issues}`);
+    ).to.equal(`${type}: [${jira}] ${subject}\n\n${body}\n\n${issues}`);
   });
   it('header, body and issues w/ scope', function() {
     expect(
@@ -108,7 +108,7 @@ describe('commit message', function() {
         body,
         issues
       })
-    ).to.equal(`${type}(${scope}): ${jira} ${subject}\n\n${body}\n\n${issues}`);
+    ).to.equal(`${type}(${scope}): [${jira}] ${subject}\n\n${body}\n\n${issues}`);
   });
   it('header, body and long issues w/ out scope', function() {
     expect(
@@ -119,7 +119,7 @@ describe('commit message', function() {
         body,
         issues: longIssues
       })
-    ).to.equal(`${type}: ${jira} ${subject}\n\n${body}\n\n${longIssuesSplit}`);
+    ).to.equal(`${type}: [${jira}] ${subject}\n\n${body}\n\n${longIssuesSplit}`);
   });
   it('header, body and long issues w/ scope', function() {
     expect(
@@ -132,7 +132,7 @@ describe('commit message', function() {
         issues: longIssues
       })
     ).to.equal(
-      `${type}(${scope}): ${jira} ${subject}\n\n${body}\n\n${longIssuesSplit}`
+      `${type}(${scope}): [${jira}] ${subject}\n\n${body}\n\n${longIssuesSplit}`
     );
   });
   it('header and long body w/ out scope', function() {
@@ -143,7 +143,7 @@ describe('commit message', function() {
         subject,
         body: longBody
       })
-    ).to.equal(`${type}: ${jira} ${subject}\n\n${longBodySplit}`);
+    ).to.equal(`${type}: [${jira}] ${subject}\n\n${longBodySplit}`);
   });
   it('header and long body w/ scope', function() {
     expect(
@@ -154,7 +154,7 @@ describe('commit message', function() {
         subject,
         body: longBody
       })
-    ).to.equal(`${type}(${scope}): ${jira} ${subject}\n\n${longBodySplit}`);
+    ).to.equal(`${type}(${scope}): [${jira}] ${subject}\n\n${longBodySplit}`);
   });
   it('header, long body and issues w/ out scope', function() {
     expect(
@@ -165,7 +165,7 @@ describe('commit message', function() {
         body: longBody,
         issues
       })
-    ).to.equal(`${type}: ${jira} ${subject}\n\n${longBodySplit}\n\n${issues}`);
+    ).to.equal(`${type}: [${jira}] ${subject}\n\n${longBodySplit}\n\n${issues}`);
   });
   it('header, long body and issues w/ scope', function() {
     expect(
@@ -178,7 +178,7 @@ describe('commit message', function() {
         issues
       })
     ).to.equal(
-      `${type}(${scope}): ${jira} ${subject}\n\n${longBodySplit}\n\n${issues}`
+      `${type}(${scope}): [${jira}] ${subject}\n\n${longBodySplit}\n\n${issues}`
     );
   });
   it('header, long body and long issues w/ out scope', function() {
@@ -191,7 +191,7 @@ describe('commit message', function() {
         issues: longIssues
       })
     ).to.equal(
-      `${type}: ${jira} ${subject}\n\n${longBodySplit}\n\n${longIssuesSplit}`
+      `${type}: [${jira}] ${subject}\n\n${longBodySplit}\n\n${longIssuesSplit}`
     );
   });
   it('header, long body and long issues w/ scope', function() {
@@ -205,7 +205,7 @@ describe('commit message', function() {
         issues: longIssues
       })
     ).to.equal(
-      `${type}(${scope}): ${jira} ${subject}\n\n${longBodySplit}\n\n${longIssuesSplit}`
+      `${type}(${scope}): [${jira}] ${subject}\n\n${longBodySplit}\n\n${longIssuesSplit}`
     );
   });
   it('header, long body, breaking change, and long issues w/ scope', function() {
@@ -220,7 +220,7 @@ describe('commit message', function() {
         issues: longIssues
       })
     ).to.equal(
-      `${type}(${scope}): ${jira} ${subject}\n\n${longBodySplit}\n\n${breakingChange}${breaking}\n\n${longIssuesSplit}`
+      `${type}(${scope}): [${jira}] ${subject}\n\n${longBodySplit}\n\n${breakingChange}${breaking}\n\n${longIssuesSplit}`
     );
   });
   it('header, long body, breaking change (with prefix entered), and long issues w/ scope', function() {
@@ -235,7 +235,7 @@ describe('commit message', function() {
         issues: longIssues
       })
     ).to.equal(
-      `${type}(${scope}): ${jira} ${subject}\n\n${longBodySplit}\n\n${breakingChange}${breaking}\n\n${longIssuesSplit}`
+      `${type}(${scope}): [${jira}] ${subject}\n\n${longBodySplit}\n\n${breakingChange}${breaking}\n\n${longIssuesSplit}`
     );
   });
 });
